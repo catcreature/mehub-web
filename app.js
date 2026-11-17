@@ -84,7 +84,7 @@ async function signIn() {
     if (waited.state === 'live') {
       const hubPub = fromBase64Url(waited.pub || '');
       if (!isPublicKey(hubPub)) return fail("The phone's key didn't make sense. Reload and try again.");
-      state.key = await sessionKey(keys.priv, hubPub, keys.pub);
+      state.key = await sessionKey(keys.priv, hubPub, keys.pub, hubPub);
       state.session = { id: waited.id, secret: started.secret };
       save();
       el('safety').textContent = await safetyCode(keys.pub, hubPub);
@@ -97,9 +97,12 @@ async function signIn() {
   }
 }
 
+// The sign-in card is hidden the moment the phone answers, so anything that goes wrong after that has
+// to be said in the header, which is always on screen.
 function fail(text) {
   el('sign-in-error').textContent = text;
   el('sign-in-error').hidden = false;
+  setStatus(text);
 }
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

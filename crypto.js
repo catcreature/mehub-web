@@ -82,11 +82,18 @@ export const isPublicKey = (pub) => decompress(pub) !== null;
 
 // The session key: one-step KDF (NIST SP 800-56A) over the shared x and both public keys, under the
 // web label, so a session key can never come out equal to a chat's pair key.
-export async function sessionKey(priv, hubPub, webPub) {
-  const raw = decompress(hubPub);
+//
+// The arguments are the phone's KeyExchange.webKey(myPriv, theirPub, webPub, hubPub), in that order,
+// so either side can be worked out with it and the two can be checked against each other. Naming the
+// peer "hubPub" instead left the browser's side the only one it could express, and a test written
+// against it proved nothing.
+export async function sessionKey(myPriv, theirPub, webPub, hubPub) {
+  const raw = decompress(theirPub);
   if (!raw) throw new Error('not a P-256 public key');
-  const theirs = await crypto.subtle.importKey({ name: 'ECDH', namedCurve: 'P-256' }, raw, { name: 'ECDH', namedCurve: 'P-256' }, false, []);
-  const shared = new Uint8Array(await crypto.subtle.deriveBits({ name: 'ECDH', public: theirs }, priv, 256));
+  // 'raw' is the format; the algorithm is the argument after the bytes. Getting these two the wrong way
+  // round is what stopped every sign-in in 0.1.0.
+  const theirs = await crypto.subtle.importKey('raw', raw, { name: 'ECDH', namedCurve: 'P-256' }, false, []);
+  const shared = new Uint8Array(await crypto.subtle.deriveBits({ name: 'ECDH', public: theirs }, myPriv, 256));
   const material = await sha256(new Uint8Array([0, 0, 0, 1]), shared, bytes(LABEL), webPub, hubPub);
   return crypto.subtle.importKey('raw', material, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
 }

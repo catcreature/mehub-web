@@ -101,6 +101,19 @@ export async function sessionKey(myPriv, theirPub, webPub, hubPub) {
 // What this browser's QR says its own key is, so the phone can tell a swapped key from the real one.
 export const fingerprint = async (pub) => toBase64Url(await sha256(bytes(LABEL), pub)).slice(0, 8);
 
+// The whole code the QR carries and the link under it, written exactly as the phone's
+// Mirror.kt formatWebSignIn does -- the prefix, the one-time link, this browser's fingerprint, and a
+// four-character checksum over the two. A camera that reads one module wrong fails that checksum on
+// the phone, which is cheaper than a round trip to the server to be told the link is nonsense.
+//
+// The phone's parseWebSignIn refuses a code without the checksum, so leaving it off here is enough to
+// make every scan and every pasted link fail.
+export const webCheck = async (link, print) =>
+  toBase64Url(await sha256(bytes(`${link}:${print}`))).slice(0, 4);
+
+export const formatWebSignIn = async (link, print) =>
+  `${LABEL}:${link}:${print}:${await webCheck(link, print)}`;
+
 // Six digits both sides show after a typed sign-in, where no fingerprint was scanned.
 export async function safetyCode(webPub, hubPub) {
   const hash = await sha256(bytes(`${LABEL}-code`), webPub, hubPub);

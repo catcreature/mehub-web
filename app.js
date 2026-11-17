@@ -7,8 +7,10 @@
 // and what you write waits. The Worker sees sealed envelopes and nothing else.
 import * as mirror from './mirror.js';
 import {
-  fromBase64Url, fingerprint, isPublicKey, newId, newKeys, open, safetyCode, seal, sessionKey, toBase64Url,
+  formatWebSignIn, fromBase64Url, fingerprint, isPublicKey, newId, newKeys, open, safetyCode, seal,
+  sessionKey, toBase64Url,
 } from './crypto.js';
+import { qrCode } from './qr.js';
 
 const SERVER = 'https://mehub.binhans2closter.workers.dev';
 const POLL_MS = 3000;
@@ -65,8 +67,17 @@ async function signIn() {
   const keys = await newKeys();
   const started = await api('webnew', { pub: toBase64Url(keys.pub), name: browserName() });
   el('code').textContent = `${started.code.slice(0, 4)} ${started.code.slice(4)}`;
-  const link = `mehubweb1:${started.link}:${await fingerprint(keys.pub)}`;
-  el('link').value = link;
+  // The code the phone scans, types or is pasted. The checksum formatWebSignIn adds is what lets the
+  // phone refuse a misread photograph without asking the server about it.
+  const signIn = await formatWebSignIn(started.link, await fingerprint(keys.pub));
+  el('link').value = signIn;
+  // The characters beside it are a whole way in on their own, so a QR that cannot be drawn takes
+  // itself off the page instead of taking the sign-in down with it. ([hidden] is !important here.)
+  try {
+    drawQr(el('qr'), signIn);
+  } catch (e) {
+    el('qr').hidden = true;
+  }
   // Until the phone claims it, this page is nothing but a waiting room.
   const until = Date.now() + (started.waitMs || 5 * 60 * 1000);
   while (!state.stopped) {
@@ -103,6 +114,27 @@ function fail(text) {
   el('sign-in-error').textContent = text;
   el('sign-in-error').hidden = false;
   setStatus(text);
+}
+
+// The sign-in code drawn for a phone's camera: four modules of quiet zone, as the standard asks, and a
+// whole number of pixels a module, so no module comes out a different width from its neighbour. Always
+// dark on light, whatever this page's theme, because that is what a camera is looking for.
+function drawQr(canvas, text) {
+  const modules = qrCode(text);
+  const quiet = 4;
+  const scale = Math.max(4, Math.floor(300 / (modules.length + quiet * 2)));
+  const side = (modules.length + quiet * 2) * scale;
+  canvas.width = side;
+  canvas.height = side;
+  const g = canvas.getContext('2d');
+  g.fillStyle = '#ffffff';
+  g.fillRect(0, 0, side, side);
+  g.fillStyle = '#000000';
+  for (let y = 0; y < modules.length; y++) {
+    for (let x = 0; x < modules.length; x++) {
+      if (modules[y][x]) g.fillRect((quiet + x) * scale, (quiet + y) * scale, scale, scale);
+    }
+  }
 }
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

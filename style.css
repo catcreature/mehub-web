@@ -48,7 +48,15 @@ h1 { margin: 0 0 10px; font-size: 24px; letter-spacing: -0.01em; }
 .lead { margin: 0 0 18px; color: var(--sub); }
 .code {
   margin: 0; background: var(--card); border-radius: 14px; padding: 18px; text-align: center;
-  font: 700 34px/1.1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.14em;
+  font: 700 30px/1.1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.14em;
+}
+/* The two ways in, side by side on a wide window and stacked on a narrow one. */
+.ways { display: flex; flex-wrap: wrap; gap: 18px; align-items: start; margin-bottom: 18px; }
+.way { flex: 1 1 200px; min-width: 0; }
+.step { margin: 0 0 10px; color: var(--sub); font-size: 14px; }
+.qr {
+  display: block; width: 100%; max-width: 296px; height: auto; border-radius: 12px;
+  background: #ffffff; padding: 0; image-rendering: pixelated;
 }
 .note { color: var(--muted); font-size: 13px; }
 .error { color: var(--accent-text); font-weight: 600; }

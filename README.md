@@ -22,13 +22,16 @@ itself. In practice:
 
 ## Signing in
 
-1. Open this page. It shows an eight-character code, good once, for five minutes.
-2. On the phone: MeHub → ⋮ → **MeHub on the web** → **Type the code**.
-3. Both sides then show six digits. They are derived from the two public keys, so if they match,
-   nobody is in the middle. If they differ, sign out from the phone at once.
+Open this page. It shows a QR code and, beside it, eight characters. Either is good once, for five
+minutes. Then, on the phone: MeHub → ⋮ → **MeHub on the web**.
 
-The page also offers a `mehubweb1:…` sign-in link, which carries the phone a fingerprint of this
-browser's public key so the check happens automatically. Reading it with the phone's camera is coming.
+- **Scan the code** (MeHub 0.16.0 and later) opens the camera: fill the frame with the QR code and take
+  the photo. Nothing more to do — the code carries a fingerprint of this browser's public key, so the
+  phone checks the key the server hands it is this browser's own, and signs the session out at once if
+  it isn't.
+- **Type the code** takes the eight characters, or the `mehubweb1:…` sign-in link pasted whole. A typed
+  code carries no fingerprint, so both sides then show six digits, derived from the two public keys:
+  if they match, nobody is in the middle, and if they differ, sign out from the phone at once.
 
 ## Running it
 
@@ -36,6 +39,7 @@ There is no build step. It is ES modules, served as files:
 
 ```sh
 python -m http.server 5173     # http://localhost:5173 is allowed by the Worker's CORS
+node --test                    # the tests that live here, run from this directory
 ```
 
 The Worker it talks to is set by `SERVER` at the top of `app.js`.
@@ -48,4 +52,10 @@ The Worker it talks to is set by `SERVER` at the top of `app.js`.
 | `app.js` | sign-in, the mirror poll, and the screen |
 | `crypto.js` | ECDH over P-256, the session KDF and AES-GCM — matched to the phone's `KeyExchange.kt` and `Crypto.kt` |
 | `mirror.js` | the record stream — a port of the phone's `Mirror.kt` |
+| `qr.js` | the sign-in QR code — a port of the phone's `Qr.kt` |
+| `qr.test.js`, `qr-fixture.json` | what pins that port to the phone's encoder, module for module |
 | `style.css` | the app's own colours |
+
+`crypto.js`, `mirror.js` and `qr.js` are ports: **a change to one of them needs the same change on the
+phone**, and neither picks it up from the other. `qr-fixture.json` is written by the phone's own test
+(`QrFixtureTest`), and both sides are held to it, so that one pair cannot drift unnoticed.

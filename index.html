@@ -28,10 +28,20 @@
 <main id="sign-in">
   <div class="card">
     <h1>Sign in from your phone</h1>
-    <p class="lead">On your phone, open MeHub and tap <b>⋮ → MeHub on the web</b>, then <b>Type the code</b> and enter this:</p>
-    <p id="code" class="code">········</p>
+    <p class="lead">On your phone, open MeHub and tap <b>⋮ → MeHub on the web</b>.</p>
+    <div class="ways">
+      <div class="way">
+        <p class="step">Tap <b>Scan the code</b> and photograph this:</p>
+        <canvas id="qr" class="qr" width="296" height="296" role="img"
+          aria-label="The sign-in code as a QR code. If you cannot scan it, type the characters beside it instead."></canvas>
+      </div>
+      <div class="way">
+        <p class="step">Or tap <b>Type the code</b> and enter this:</p>
+        <p id="code" class="code">········</p>
+      </div>
+    </div>
     <p id="sign-in-error" class="error" hidden></p>
-    <p class="note">The code works once, for five minutes. After it is in, your phone shows six digits — check they match the ones that appear at the top of this page.</p>
+    <p class="note">Either way works once, for five minutes. Scanning checks your phone and this page hold each other's real keys by itself. If you type the code instead, your phone then shows six digits — check they match the ones that appear at the top of this page.</p>
     <details>
       <summary>How this works, and what it can't do</summary>
       <ul>

@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="dark light">
+<title>MeHub on the web</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 44 44'%3E%3Cpath d='M9 35L34 10' stroke='%23FF6B4A' stroke-width='4'/%3E%3Ccircle cx='34' cy='10' r='8' fill='%23FF6B4A'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <span class="brand">
+    <svg width="26" height="26" viewBox="0 0 44 44" aria-hidden="true">
+      <path d="M9 35L34 10" stroke="currentColor" stroke-width="4"/>
+      <circle cx="9" cy="35" r="4.5" fill="currentColor"/>
+      <circle cx="34" cy="10" r="8" fill="#FF6B4A"/>
+    </svg>
+    <b>MeHub</b>
+  </span>
+  <span id="status" class="status" role="status" hidden></span>
+  <span id="safety-row" class="safety" hidden>Check digits <code id="safety">······</code></span>
+  <button id="sign-out" class="plain">Sign out</button>
+</header>
+
+<main id="sign-in">
+  <div class="card">
+    <h1>Sign in from your phone</h1>
+    <p class="lead">On your phone, open MeHub and tap <b>⋮ → MeHub on the web</b>, then <b>Type the code</b> and enter this:</p>
+    <p id="code" class="code">········</p>
+    <p id="sign-in-error" class="error" hidden></p>
+    <p class="note">The code works once, for five minutes. After it is in, your phone shows six digits — check they match the ones that appear at the top of this page.</p>
+    <details>
+      <summary>How this works, and what it can't do</summary>
+      <ul>
+        <li><b>Your phone does the sending.</b> MeHub's server deletes a message as soon as a phone has it, and your chat keys never leave your phone, so your phone holds the only copy of your chats and passes them to this page itself. Keep it on and online.</li>
+        <li><b>The server still can't read anything.</b> Your phone and this page work out a key between themselves that the server never sees, and everything between them is sealed with it.</li>
+        <li><b>Messages still go after 24 hours</b>, here as on the phone. Nothing is saved on this computer: close the tab and it is gone.</li>
+        <li><b>Photos, files and voice messages</b> show as a card naming the file. Open those on your phone.</li>
+      </ul>
+      <p class="note">A sign-in link, if you would rather paste it than type a code:</p>
+      <p class="linkrow"><input id="link" class="link" readonly value=""><button id="copy-link" class="plain">Copy</button></p>
+    </details>
+  </div>
+</main>
+
+<main id="chats" class="split" hidden>
+  <aside>
+    <div id="list" class="list"></div>
+  </aside>
+  <section>
+    <div id="chat-head" class="chat-head"></div>
+    <div id="thread" class="thread"></div>
+    <div id="composer" class="composer" hidden>
+      <textarea id="composer-field" rows="1" maxlength="900" placeholder="Write a message" aria-label="Write a message"></textarea>
+      <button id="composer-send" class="send" aria-label="Send">Send</button>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span>Everything goes 24 hours after it is sent.</span>
+  <span id="egg" class="egg" title="MeHub on the web">·</span>
+</footer>
+
+<script type="module" src="app.js"></script>
+<script type="module">
+  // Seven taps on the dot, as the phone's About does.
+  let taps = 0;
+  const dot = document.getElementById('egg');
+  dot.onclick = () => {
+    if (++taps === 7) dot.textContent = 'Created by catcreature';
+  };
+</script>
+</body>
+</html>

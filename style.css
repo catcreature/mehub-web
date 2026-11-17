@@ -11,6 +11,9 @@
   }
 }
 * { box-sizing: border-box; }
+/* Both panels set their own display, which would otherwise beat the hidden attribute and show the two
+   of them at once. */
+[hidden] { display: none !important; }
 html, body { height: 100%; }
 body {
   margin: 0; display: flex; flex-direction: column; background: var(--ground); color: var(--text);

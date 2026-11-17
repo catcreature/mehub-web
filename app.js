@@ -74,8 +74,11 @@ async function signIn() {
     let waited;
     try {
       waited = await api('webwait', {}, started.secret);
+      setStatus(null);
     } catch (e) {
       if (e.status === 401) return fail('This sign-in is gone. Reload for a new code.');
+      // Still waiting, just not heard from: the code on screen is good either way.
+      setStatus("Can't reach the server — still trying.");
       continue;
     }
     if (waited.state === 'live') {
@@ -424,7 +427,14 @@ function start() {
   } catch (e) {
     old = null;
   }
-  const begin = () => signIn().catch((e) => fail(e.code === 'busy' ? 'The server is busy. Try again in a minute.' : "Couldn't reach the server."));
+  // Whatever went wrong is said plainly: a guess at the cause sent one report down the wrong path.
+  const begin = () =>
+    signIn().catch((e) => {
+      if (e.code === 'busy') return fail('The server is busy. Try again in a minute.');
+      if (e.code) return fail(`The server answered "${e.code}" (${e.status}). Reload to try again.`);
+      fail(`Sign-in stopped: ${e.message}. Reload to try again.`);
+      console.error(e);
+    });
   if (old && old.secret) {
     sessionStorage.removeItem(STORE);
     api('webrevoke', {}, old.secret).catch(() => {}).then(begin);
